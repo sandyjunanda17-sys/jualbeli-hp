@@ -9,6 +9,7 @@ import {
   PhoneProduct,
   PhoneVariant,
   PromoBanner,
+  ShippingOption,
   TradeInSubmission,
   Voucher,
 } from "@/types/store";
@@ -43,6 +44,7 @@ import {
   Image as ImageIcon,
   Loader2,
   MapPin,
+  Truck,
 } from "lucide-react";
 
 export default function AdminPanel({
@@ -61,6 +63,7 @@ export default function AdminPanel({
     deleteBanner,
     saveVoucher,
     deleteVoucher,
+    updateShippingOptions,
     updateOrderStatus,
     updateTradeInStatus,
     resetToDefaultData,
@@ -69,8 +72,60 @@ export default function AdminPanel({
   } = useStore();
 
   const [subTab, setSubTab] = useState<
-    "brand" | "products" | "marketing" | "database"
+    "brand" | "products" | "marketing" | "shipping" | "database"
   >("brand");
+
+  // Shipping options state
+  const [shippingList, setShippingList] = useState<ShippingOption[]>(
+    store.shippingOptions && store.shippingOptions.length > 0
+      ? store.shippingOptions
+      : [
+          {
+            id: "ship-1",
+            name: "Ongkir Dikonfirmasi via WhatsApp (Sesuai Alamat)",
+            cost: 0,
+            type: "calculated_via_wa",
+            description: "Admin mengecek ongkir sesuai kecamatan Anda saat konfirmasi chat WhatsApp",
+            active: true,
+          },
+          {
+            id: "ship-2",
+            name: "Promo Gratis Ongkir Seluruh Indonesia",
+            cost: 0,
+            type: "free",
+            description: "Gratis Ongkir + Packing Kayu & Asuransi ditanggung penuh oleh Toko",
+            active: true,
+          },
+          {
+            id: "ship-3",
+            name: "JNE YES + Packing Kayu Asuransi",
+            cost: 45000,
+            type: "fixed",
+            description: "Tarif flat pengiriman kilat 1 hari sampai dengan asuransi & packing kayu",
+            active: false,
+          },
+          {
+            id: "ship-4",
+            name: "Ambil Langsung / Cek Unit di Toko Offline (COD)",
+            cost: 0,
+            type: "free",
+            description: "Bayar di tempat saat cek kondisi unit langsung di toko fisik",
+            active: true,
+          },
+        ]
+  );
+
+  const [newShippingOption, setNewShippingOption] = useState<{
+    name: string;
+    type: "calculated_via_wa" | "free" | "fixed";
+    cost: number;
+    description: string;
+  }>({
+    name: "",
+    type: "calculated_via_wa",
+    cost: 0,
+    description: "",
+  });
 
   // Brand form state
   const [brandForm, setBrandForm] = useState<BrandConfig>(store.brandConfig);
@@ -395,7 +450,8 @@ export default function AdminPanel({
           { id: "brand", label: "1. Logo, WhatsApp & Brand", icon: Palette },
           { id: "products", label: `2. Katalog HP (${store.products.length})`, icon: Smartphone },
           { id: "marketing", label: "3. Banner Promo & Voucher", icon: Megaphone },
-          { id: "database", label: "4. Database & Cloud Sync", icon: Database },
+          { id: "shipping", label: "4. Pilihan Pengiriman & Ongkir", icon: Truck },
+          { id: "database", label: "5. Database & Cloud Sync", icon: Database },
         ].map((tab) => {
           const Icon = tab.icon;
           const active = subTab === tab.id;
@@ -1090,7 +1146,374 @@ export default function AdminPanel({
         </div>
       )}
 
-      {/* TAB 6: DATABASE EXPORT / IMPORT / RESET */}
+      {/* TAB 4: SHIPPING & ONGKIR MANAGEMENT */}
+      {subTab === "shipping" && (
+        <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold mb-1.5">
+                <Truck className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Pengaturan Kurir & Biaya Kirim</span>
+              </div>
+              <h2 className="text-xl font-black text-slate-900 tracking-tight">
+                Pilihan Pengiriman & Ongkos Kirim (Owner Control)
+              </h2>
+              <p className="text-xs text-slate-500 mt-1 max-w-2xl">
+                Tentukan opsi pengiriman apa saja yang muncul saat customer checkout. Anda bisa mengaktifkan mode konfirmasi via WhatsApp, promo Gratis Ongkir, atau keduanya sekaligus agar customer bebas memilih.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => updateShippingOptions(shippingList)}
+              className="px-5 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-extrabold text-xs sm:text-sm flex items-center gap-2 shadow-md shadow-brand-600/25 transition shrink-0"
+            >
+              <Save className="w-4 h-4" />
+              <span>Simpan Pengaturan Pengiriman</span>
+            </button>
+          </div>
+
+          {/* Quick Preset Selector (1-Click Switcher) */}
+          <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+            <h3 className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-amber-500" />
+              <span>Preset Cepat (Pilih Salah Satu atau Keduanya):</span>
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  const updated = shippingList.map((o) => {
+                    if (o.type === "calculated_via_wa") return { ...o, active: true };
+                    if (o.type === "free" && o.name.includes("Gratis")) return { ...o, active: false };
+                    return o;
+                  });
+                  setShippingList(updated);
+                  updateShippingOptions(updated);
+                }}
+                className="p-3.5 rounded-xl border border-slate-200 bg-white hover:border-brand-500 hover:bg-brand-50/40 text-left transition space-y-1 group"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-extrabold text-slate-900 group-hover:text-brand-700">
+                    Mode A: Hitung via WhatsApp
+                  </span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800">
+                    Paling Akurat
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500 leading-relaxed">
+                  Ongkir dicek manual oleh Admin di WA sesuai alamat/kecamatan pembeli.
+                </p>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const updated = shippingList.map((o) => {
+                    if (o.type === "calculated_via_wa") return { ...o, active: false };
+                    if (o.type === "free" && o.name.includes("Gratis")) return { ...o, active: true };
+                    return o;
+                  });
+                  setShippingList(updated);
+                  updateShippingOptions(updated);
+                }}
+                className="p-3.5 rounded-xl border border-slate-200 bg-white hover:border-emerald-500 hover:bg-emerald-50/40 text-left transition space-y-1 group"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-extrabold text-slate-900 group-hover:text-emerald-700">
+                    Mode B: Gratis Ongkir Toko
+                  </span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">
+                    Promo Menarik
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500 leading-relaxed">
+                  Semua pembeli mendapat promo gratis ongkir ke seluruh Indonesia.
+                </p>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const updated = shippingList.map((o) => {
+                    if (o.type === "calculated_via_wa" || o.name.includes("Gratis")) {
+                      return { ...o, active: true };
+                    }
+                    return o;
+                  });
+                  setShippingList(updated);
+                  updateShippingOptions(updated);
+                }}
+                className="p-3.5 rounded-xl border border-slate-200 bg-white hover:border-violet-500 hover:bg-violet-50/40 text-left transition space-y-1 group"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-extrabold text-slate-900 group-hover:text-violet-700">
+                    Mode C: Keduanya Aktif
+                  </span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-violet-100 text-violet-800">
+                    Fleksibel
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500 leading-relaxed">
+                  Customer bisa memilih mau hitung via WA atau pakai promo gratis ongkir toko.
+                </p>
+              </button>
+            </div>
+          </div>
+
+          {/* List of Shipping Options (Cards with Full Controls) */}
+          <div className="space-y-4">
+            <h3 className="text-xs font-black uppercase tracking-wider text-slate-800">
+              Daftar Opsi Pengiriman Saat Checkout ({shippingList.length} Pilihan)
+            </h3>
+
+            <div className="space-y-3">
+              {shippingList.map((opt, idx) => (
+                <div
+                  key={opt.id}
+                  className={`p-4 rounded-2xl border transition ${
+                    opt.active
+                      ? "border-slate-300 bg-white shadow-xs"
+                      : "border-slate-200 bg-slate-50 opacity-70"
+                  }`}
+                >
+                  <div className="grid grid-cols-1 sm:grid-cols-12 gap-3.5 items-center">
+                    {/* Toggle Active */}
+                    <div className="sm:col-span-1 flex items-center justify-start">
+                      <label className="flex items-center gap-2 cursor-pointer" title={opt.active ? "Aktif" : "Nonaktif"}>
+                        <input
+                          type="checkbox"
+                          checked={opt.active}
+                          onChange={(e) => {
+                            const updated = [...shippingList];
+                            updated[idx].active = e.target.checked;
+                            setShippingList(updated);
+                          }}
+                          className="w-4 h-4 rounded text-brand-600 cursor-pointer"
+                        />
+                        <span className="text-[10px] font-bold text-slate-500 sm:hidden">
+                          {opt.active ? "Aktif" : "Mati"}
+                        </span>
+                      </label>
+                    </div>
+
+                    {/* Name Input */}
+                    <div className="sm:col-span-4">
+                      <label className="block text-[10px] font-bold text-slate-500 mb-1">
+                        Nama Metode Pengiriman
+                      </label>
+                      <input
+                        type="text"
+                        value={opt.name}
+                        onChange={(e) => {
+                          const updated = [...shippingList];
+                          updated[idx].name = e.target.value;
+                          setShippingList(updated);
+                        }}
+                        className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-white"
+                      />
+                    </div>
+
+                    {/* Type Selector */}
+                    <div className="sm:col-span-3">
+                      <label className="block text-[10px] font-bold text-slate-500 mb-1">
+                        Jenis Perhitungan Biaya
+                      </label>
+                      <select
+                        value={opt.type}
+                        onChange={(e) => {
+                          const updated = [...shippingList];
+                          const newType = e.target.value as ShippingOption["type"];
+                          updated[idx].type = newType;
+                          if (newType !== "fixed") updated[idx].cost = 0;
+                          setShippingList(updated);
+                        }}
+                        className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white font-medium"
+                      >
+                        <option value="calculated_via_wa">Dihitung Admin via WA</option>
+                        <option value="free">Gratis Ongkir (Rp 0)</option>
+                        <option value="fixed">Tarif Tetap (Flat)</option>
+                      </select>
+                    </div>
+
+                    {/* Cost Input */}
+                    <div className="sm:col-span-2">
+                      <label className="block text-[10px] font-bold text-slate-500 mb-1">
+                        Biaya (Rp)
+                      </label>
+                      <input
+                        type="number"
+                        step={5000}
+                        disabled={opt.type !== "fixed"}
+                        value={opt.cost || 0}
+                        onChange={(e) => {
+                          const updated = [...shippingList];
+                          updated[idx].cost = Number(e.target.value);
+                          setShippingList(updated);
+                        }}
+                        className={`w-full px-3 py-2 rounded-xl border text-xs font-bold ${
+                          opt.type === "fixed"
+                            ? "bg-white border-slate-200 text-slate-900"
+                            : "bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed"
+                        }`}
+                      />
+                    </div>
+
+                    {/* Delete Action */}
+                    <div className="sm:col-span-2 flex items-center justify-end gap-2">
+                      <span
+                        className={`text-[10px] font-extrabold px-2 py-1 rounded-md ${
+                          opt.active
+                            ? "bg-emerald-100 text-emerald-800"
+                            : "bg-slate-200 text-slate-600"
+                        }`}
+                      >
+                        {opt.active ? "Tampil di Web" : "Disembunyikan"}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = shippingList.filter((_, i) => i !== idx);
+                          setShippingList(updated);
+                        }}
+                        className="p-2 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
+                        title="Hapus opsi ini"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    {/* Description Line */}
+                    <div className="sm:col-span-12 pt-1 border-t border-slate-100">
+                      <label className="block text-[10px] font-bold text-slate-400 mb-1">
+                        Keterangan yang dibaca pembeli saat memilih kurir ini:
+                      </label>
+                      <input
+                        type="text"
+                        value={opt.description}
+                        onChange={(e) => {
+                          const updated = [...shippingList];
+                          updated[idx].description = e.target.value;
+                          setShippingList(updated);
+                        }}
+                        placeholder="Contoh: Admin mengecek ongkir sesuai kecamatan Anda saat konfirmasi chat WhatsApp"
+                        className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs bg-slate-50/50"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Add New Custom Shipping Option */}
+          <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+            <h4 className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+              <Plus className="w-4 h-4 text-brand-600" />
+              <span>Tambah Opsi Pengiriman Baru</span>
+            </h4>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <input
+                type="text"
+                value={newShippingOption.name}
+                onChange={(e) =>
+                  setNewShippingOption({ ...newShippingOption, name: e.target.value })
+                }
+                placeholder="Nama Opsi (misal: J&T Express / SiCepat)"
+                className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs bg-white font-bold"
+              />
+              <select
+                value={newShippingOption.type}
+                onChange={(e) =>
+                  setNewShippingOption({
+                    ...newShippingOption,
+                    type: e.target.value as ShippingOption["type"],
+                    cost: e.target.value === "fixed" ? 30000 : 0,
+                  })
+                }
+                className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs bg-white"
+              >
+                <option value="calculated_via_wa">Dihitung Admin via WhatsApp</option>
+                <option value="free">Gratis Ongkir (Rp 0)</option>
+                <option value="fixed">Tarif Tetap (Flat)</option>
+              </select>
+              <input
+                type="number"
+                step={5000}
+                disabled={newShippingOption.type !== "fixed"}
+                value={newShippingOption.cost}
+                onChange={(e) =>
+                  setNewShippingOption({
+                    ...newShippingOption,
+                    cost: Number(e.target.value),
+                  })
+                }
+                placeholder="Biaya Ongkir (Rp)"
+                className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs bg-white"
+              />
+            </div>
+            <input
+              type="text"
+              value={newShippingOption.description}
+              onChange={(e) =>
+                setNewShippingOption({
+                  ...newShippingOption,
+                  description: e.target.value,
+                })
+              }
+              placeholder="Keterangan singkat untuk pembeli..."
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs bg-white"
+            />
+            <button
+              type="button"
+              onClick={() => {
+                if (!newShippingOption.name.trim()) {
+                  showToast("Masukkan nama opsi pengiriman terlebih dahulu.");
+                  return;
+                }
+                const newOpt: ShippingOption = {
+                  id: `ship-${Date.now()}`,
+                  name: newShippingOption.name.trim(),
+                  type: newShippingOption.type,
+                  cost: newShippingOption.type === "fixed" ? newShippingOption.cost : 0,
+                  description:
+                    newShippingOption.description.trim() ||
+                    (newShippingOption.type === "calculated_via_wa"
+                      ? "Dihitung saat konfirmasi WhatsApp"
+                      : "Pengiriman aman berasuransi"),
+                  active: true,
+                };
+                const updated = [...shippingList, newOpt];
+                setShippingList(updated);
+                updateShippingOptions(updated);
+                setNewShippingOption({
+                  name: "",
+                  type: "calculated_via_wa",
+                  cost: 0,
+                  description: "",
+                });
+              }}
+              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition"
+            >
+              + Tambah Opsi ke Daftar
+            </button>
+          </div>
+
+          {/* Bottom Save Action */}
+          <div className="pt-2 flex justify-end">
+            <button
+              type="button"
+              onClick={() => updateShippingOptions(shippingList)}
+              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-brand-600/25 transition"
+            >
+              <Save className="w-4 h-4" />
+              <span>Simpan Pengaturan Pengiriman</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 5: DATABASE EXPORT / IMPORT / RESET */}
       {subTab === "database" && (
         <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
           <div>

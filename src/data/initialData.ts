@@ -458,4 +458,38 @@ export const INITIAL_STORE_DATA: StoreData = {
       createdAt: "2026-10-29T11:15:00.000Z",
     },
   ],
+  shippingOptions: [
+    {
+      id: "ship-1",
+      name: "Ongkir Dikonfirmasi via WhatsApp (Sesuai Alamat)",
+      cost: 0,
+      type: "calculated_via_wa",
+      description: "Admin mengecek ongkir sesuai kecamatan Anda saat konfirmasi chat WhatsApp",
+      active: true,
+    },
+    {
+      id: "ship-2",
+      name: "Promo Gratis Ongkir Seluruh Indonesia",
+      cost: 0,
+      type: "free",
+      description: "Gratis Ongkir + Packing Kayu & Asuransi ditanggung penuh oleh Toko",
+      active: true,
+    },
+    {
+      id: "ship-3",
+      name: "JNE YES + Packing Kayu Asuransi",
+      cost: 45000,
+      type: "fixed",
+      description: "Tarif flat pengiriman kilat 1 hari sampai dengan asuransi & packing kayu",
+      active: false,
+    },
+    {
+      id: "ship-4",
+      name: "Ambil Langsung / Cek Unit di Toko Offline (COD)",
+      cost: 0,
+      type: "free",
+      description: "Bayar di tempat saat cek kondisi unit langsung di toko fisik",
+      active: true,
+    },
+  ],
 };

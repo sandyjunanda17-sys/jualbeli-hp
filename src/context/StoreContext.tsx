@@ -7,6 +7,7 @@ import {
   PhoneProduct,
   PhoneVariant,
   PromoBanner,
+  ShippingOption,
   StoreData,
   TradeInSubmission,
   Voucher,
@@ -37,6 +38,7 @@ interface StoreContextType {
   deleteBanner: (id: string) => Promise<void>;
   saveVoucher: (voucher: Voucher) => Promise<void>;
   deleteVoucher: (id: string) => Promise<void>;
+  updateShippingOptions: (options: ShippingOption[]) => Promise<void>;
   updateOrderStatus: (orderId: string, status: Order["status"], resiNumber?: string) => Promise<void>;
   updateTradeInStatus: (id: string, status: TradeInSubmission["status"], estimatedValue?: number) => Promise<void>;
   resetToDefaultData: () => Promise<void>;
@@ -311,6 +313,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     showToast("Voucher dihapus.");
   };
 
+  const updateShippingOptions = async (options: ShippingOption[]) => {
+    await persistStore({ ...store, shippingOptions: options });
+    showToast("Pengaturan pilihan pengiriman berhasil disimpan!");
+  };
+
   const updateOrderStatus = async (orderId: string, status: Order["status"], resiNumber?: string) => {
     const nextOrders = store.orders.map((o) =>
       o.id === orderId ? { ...o, status, ...(resiNumber !== undefined ? { resiNumber } : {}) } : o
@@ -477,6 +484,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         deleteBanner,
         saveVoucher,
         deleteVoucher,
+        updateShippingOptions,
         updateOrderStatus,
         updateTradeInStatus,
         resetToDefaultData,

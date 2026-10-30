@@ -142,6 +142,15 @@ export interface BrandConfig {
   }[];
 }
 
+export interface ShippingOption {
+  id: string;
+  name: string;
+  cost: number;
+  type: "calculated_via_wa" | "free" | "fixed";
+  description: string;
+  active: boolean;
+}
+
 export interface StoreData {
   brandConfig: BrandConfig;
   banners: PromoBanner[];
@@ -149,5 +158,6 @@ export interface StoreData {
   vouchers: Voucher[];
   orders: Order[];
   tradeIns: TradeInSubmission[];
+  shippingOptions?: ShippingOption[];
   lastUpdated: string;
 }

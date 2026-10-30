@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useStore } from "@/context/StoreContext";
 import { buildWhatsAppUrl, formatRupiah } from "@/utils/format";
-import { Order } from "@/types/store";
+import { Order, ShippingOption } from "@/types/store";
 import {
   X,
   ShoppingBag,
@@ -18,6 +18,7 @@ import {
   MessageCircle,
   ArrowRight,
   Flame,
+  Sparkles,
 } from "lucide-react";
 
 interface CartCheckoutDrawerProps {
@@ -48,18 +49,52 @@ export default function CartCheckoutDrawer({ isOpen, onClose }: CartCheckoutDraw
   const [customerName, setCustomerName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [address, setAddress] = useState("");
-  const [shippingMethod, setShippingMethod] = useState("Kurir Instan Toko (Gratis Asuransi)");
+  const [selectedShippingId, setSelectedShippingId] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("Transfer Bank / Virtual Account");
   const [createdOrder, setCreatedOrder] = useState<Order | null>(null);
 
+  // Active shipping options from store or fallback
+  const availableShippingOptions: ShippingOption[] = useMemo(() => {
+    const list = store.shippingOptions?.filter((o) => o.active);
+    if (list && list.length > 0) return list;
+    return [
+      {
+        id: "ship-1",
+        name: "Ongkir Dikonfirmasi via WhatsApp (Sesuai Alamat)",
+        cost: 0,
+        type: "calculated_via_wa",
+        description: "Admin mengecek ongkir sesuai kecamatan Anda saat konfirmasi chat WhatsApp",
+        active: true,
+      },
+      {
+        id: "ship-2",
+        name: "Promo Gratis Ongkir Seluruh Indonesia",
+        cost: 0,
+        type: "free",
+        description: "Gratis Ongkir + Packing Kayu & Asuransi ditanggung penuh oleh Toko",
+        active: true,
+      },
+    ];
+  }, [store.shippingOptions]);
+
+  useEffect(() => {
+    if (availableShippingOptions.length > 0 && !availableShippingOptions.some((o) => o.id === selectedShippingId)) {
+      setSelectedShippingId(availableShippingOptions[0].id);
+    }
+  }, [availableShippingOptions, selectedShippingId]);
+
   if (!isOpen) return null;
+
+  const currentShipping = availableShippingOptions.find((o) => o.id === selectedShippingId) || availableShippingOptions[0];
+  const shippingCost = currentShipping?.type === "fixed" ? (currentShipping.cost || 0) : 0;
+  const isShippingViaWa = currentShipping?.type === "calculated_via_wa";
+  const isShippingFree = currentShipping?.type === "free";
 
   const subtotal = cart.reduce((acc, item) => acc + item.variant.price * item.quantity, 0);
   const totalOriginalPrice = cart.reduce((acc, item) => {
     const orig = item.variant.originalPrice || Math.round(item.variant.price * 1.15);
     return acc + orig * item.quantity;
   }, 0);
-  const shippingCost = shippingMethod.includes("JNE") ? 45000 : 0;
   const voucherDiscount = appliedVoucher ? appliedVoucher.amount : 0;
   const tradeInDiscount = activeTradeInCredit ? activeTradeInCredit.amount : 0;
   const totalDiscount = voucherDiscount + tradeInDiscount;
@@ -92,7 +127,7 @@ export default function CartCheckoutDrawer({ isOpen, onClose }: CartCheckoutDraw
       customerName,
       whatsapp,
       address,
-      shippingMethod,
+      shippingMethod: currentShipping?.name || "Kurir Toko",
       paymentMethod,
       items: cart.map((item) => ({
         productId: item.product.id,
@@ -349,23 +384,31 @@ export default function CartCheckoutDrawer({ isOpen, onClose }: CartCheckoutDraw
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
-                  <Truck className="w-4 h-4 text-brand-600" /> Metode Pengiriman
+                  <Truck className="w-4 h-4 text-brand-600" /> Metode & Pilihan Pengiriman
                 </label>
-                <select
-                  value={shippingMethod}
-                  onChange={(e) => setShippingMethod(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white outline-none focus:border-brand-600"
-                >
-                  <option value="Kurir Instan Toko (Gratis Asuransi)">
-                    Kurir Instan Toko - Gratis Ongkir & Asuransi Penuh
-                  </option>
-                  <option value="JNE YES + Packing Kayu Asuransi (+Rp 45.000)">
-                    JNE YES + Packing Kayu Asuransi (+Rp 45.000)
-                  </option>
-                  <option value="Ambil Langsung / Cek Unit di Store Offline">
-                    Ambil Langsung / Cek Unit di Store Offline (Gratis)
-                  </option>
-                </select>
+                <div className="space-y-2">
+                  <select
+                    value={selectedShippingId}
+                    onChange={(e) => setSelectedShippingId(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white outline-none focus:border-brand-600 font-medium"
+                  >
+                    {availableShippingOptions.map((opt) => (
+                      <option key={opt.id} value={opt.id}>
+                        {opt.name} — {opt.type === "free" ? "GRATIS" : opt.type === "calculated_via_wa" ? "Dihitung via WhatsApp" : formatRupiah(opt.cost)}
+                      </option>
+                    ))}
+                  </select>
+
+                  {currentShipping && (
+                    <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 flex items-start gap-2">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-bold text-slate-800">{currentShipping.name}: </span>
+                        <span>{currentShipping.description}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div>
@@ -431,7 +474,7 @@ export default function CartCheckoutDrawer({ isOpen, onClose }: CartCheckoutDraw
               <a
                 href={buildWhatsAppUrl(
                   store.brandConfig.whatsappNumber,
-                  `Halo Admin *${store.brandConfig.name}*, saya telah membuat pesanan baru:\n\n🧾 *No. Invoice:* ${createdOrder.id}\n👤 *Nama:* ${createdOrder.customerName}\n📱 *Item:* ${createdOrder.items.map((i) => `${i.productName} (${i.variantLabel}) x${i.quantity}`).join(", ")}\n💰 *Total Akhir:* ${formatRupiah(createdOrder.total)}\n💳 *Pembayaran:* ${createdOrder.paymentMethod}\n\nMohon info proses selanjutnya. Terima kasih!`
+                  `Halo Admin *${store.brandConfig.name}*, saya ingin konfirmasi pesanan baru:\n\n🧾 *No. Invoice:* ${createdOrder.id}\n👤 *Nama Pemesan:* ${createdOrder.customerName}\n📞 *WhatsApp:* ${createdOrder.whatsapp}\n📍 *Alamat:* ${createdOrder.address}\n📱 *Item Unit:* ${createdOrder.items.map((i) => `${i.productName} (${i.variantLabel}) x${i.quantity}`).join(", ")}\n🚚 *Metode Kirim:* ${createdOrder.shippingMethod}\n📦 *Ongkos Kirim:* ${createdOrder.shippingCost > 0 ? formatRupiah(createdOrder.shippingCost) : (createdOrder.shippingMethod.includes("WhatsApp") ? "Menunggu Hitungan Admin via WA" : "GRATIS / Rp 0")}\n💰 *Total Pembayaran:* ${formatRupiah(createdOrder.total)}${createdOrder.shippingMethod.includes("WhatsApp") ? " (+ Ongkir sesuai kurir)" : ""}\n💳 *Metode Pembayaran:* ${createdOrder.paymentMethod}\n\nMohon info nomor rekening / proses selanjutnya ya kak. Terima kasih!`
                 )}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -464,10 +507,22 @@ export default function CartCheckoutDrawer({ isOpen, onClose }: CartCheckoutDraw
                   <span>- {formatRupiah(tradeInDiscount)}</span>
                 </div>
               )}
-              {shippingCost > 0 && step === "checkout" && (
+              {step === "checkout" && (
                 <div className="flex justify-between text-slate-600">
                   <span>Biaya Pengiriman & Asuransi</span>
-                  <span className="font-semibold">{formatRupiah(shippingCost)}</span>
+                  <span className="font-bold">
+                    {isShippingViaWa ? (
+                      <span className="text-amber-700 bg-amber-50 px-2 py-0.5 rounded text-[11px] font-extrabold border border-amber-200">
+                        Dihitung via WhatsApp
+                      </span>
+                    ) : isShippingFree ? (
+                      <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded text-[11px] font-black border border-emerald-200">
+                        GRATIS (Promo)
+                      </span>
+                    ) : (
+                      <span className="font-semibold text-slate-800">{formatRupiah(shippingCost)}</span>
+                    )}
+                  </span>
                 </div>
               )}
               {totalSavings > 0 && (
