@@ -7,24 +7,103 @@ import { StoreData } from "@/types/store";
 const DATA_DIR = path.join(process.cwd(), "data");
 const DATA_FILE = path.join(DATA_DIR, "store.json");
 
-// Helper to determine namespace key based on Host domain so multiple clients don't collide
-function getStorageKey(request?: Request): string {
-  try {
-    const host = request?.headers.get("host") || "default";
-    const clean = host.replace(/[^a-zA-Z0-9_-]/g, "_").toLowerCase();
-    return `nusaphone_store_${clean}`;
-  } catch {
-    return "nusaphone_store_default";
-  }
+// Single unified store key so all devices (laptop, mobile, tablet) share the EXACT same database
+const GLOBAL_STORE_KEY = "rphone_official_store_v1";
+
+function getStorageKey(): string {
+  return GLOBAL_STORE_KEY;
 }
 
-// Check Upstash / Vercel KV environment variables
-function getKvConfig() {
-  const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
-  if (url && token) {
-    return { url: url.replace(/\/+$/, ""), token };
+// Universal Upstash / Vercel KV environment variables auto-detection
+function getKvConfig(): { url: string; token: string; source: string } | null {
+  // 1. Check known common variable combinations (including STORAGE prefix created by Upstash integration)
+  const knownPrefixes = [
+    "STORAGE",
+    "UPSTASH_REDIS",
+    "KV",
+    "VERCEL_KV",
+    "REDIS",
+    "RPHONE_DB",
+  ];
+
+  for (const prefix of knownPrefixes) {
+    const url =
+      process.env[`${prefix}_REST_API_URL`] ||
+      process.env[`${prefix}_REST_URL`] ||
+      process.env[`${prefix}_URL`];
+    const token =
+      process.env[`${prefix}_REST_API_TOKEN`] ||
+      process.env[`${prefix}_TOKEN`] ||
+      process.env[`${prefix}_REST_TOKEN`];
+
+    if (url && token && url.startsWith("http")) {
+      return {
+        url: url.replace(/\/+$/, ""),
+        token,
+        source: `${prefix}_REST_API_URL`,
+      };
+    }
   }
+
+  // 2. Fallback: Search all environment variables dynamically for any REST API URL + TOKEN pair
+  let foundUrl = "";
+  let foundToken = "";
+  let source = "dynamic";
+
+  for (const [key, val] of Object.entries(process.env)) {
+    if (!val || typeof val !== "string") continue;
+    if (
+      (key.includes("REST_API_URL") || key.includes("REST_URL") || key.endsWith("_URL")) &&
+      val.startsWith("http") &&
+      (val.includes("upstash.io") || val.includes("vercel-storage.com"))
+    ) {
+      foundUrl = val;
+      source = key;
+
+      // Extract prefix from key
+      const prefix = key
+        .replace(/_REST_API_URL$/, "")
+        .replace(/_REST_URL$/, "")
+        .replace(/_URL$/, "");
+
+      const candidates = [
+        `${prefix}_REST_API_TOKEN`,
+        `${prefix}_TOKEN`,
+        `${prefix}_REST_TOKEN`,
+      ];
+      for (const c of candidates) {
+        if (process.env[c]) {
+          foundToken = process.env[c]!;
+          break;
+        }
+      }
+      if (foundUrl && foundToken) break;
+    }
+  }
+
+  // 3. If URL found but token not found by prefix, find any long token variable
+  if (foundUrl && !foundToken) {
+    for (const [key, val] of Object.entries(process.env)) {
+      if (
+        key.includes("TOKEN") &&
+        !key.includes("READ_ONLY") &&
+        typeof val === "string" &&
+        val.length > 20
+      ) {
+        foundToken = val;
+        break;
+      }
+    }
+  }
+
+  if (foundUrl && foundToken) {
+    return {
+      url: foundUrl.replace(/\/+$/, ""),
+      token: foundToken,
+      source,
+    };
+  }
+
   return null;
 }
 
@@ -42,9 +121,47 @@ async function readFromKv(key: string): Promise<StoreData | null> {
       body: JSON.stringify(["GET", key]),
       cache: "no-store",
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      console.error("[KV Read HTTP Error]:", res.status, res.statusText);
+      return null;
+    }
     const json = (await res.json()) as { result?: string | null };
-    if (!json.result) return null;
+    if (!json.result) {
+      // Legacy key fallback check if main key not yet seeded
+      if (key === GLOBAL_STORE_KEY) {
+        const legacyKeys = [
+          "nusaphone_store_rphonecell_jualbelihp_vercel_app",
+          "nusaphone_store_default",
+          "nusaphone_store_localhost_3000",
+        ];
+        for (const lk of legacyKeys) {
+          try {
+            const lRes = await fetch(cfg.url, {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${cfg.token}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(["GET", lk]),
+              cache: "no-store",
+            });
+            if (lRes.ok) {
+              const lJson = (await lRes.json()) as { result?: string | null };
+              if (lJson.result) {
+                const parsed =
+                  typeof lJson.result === "string" ? JSON.parse(lJson.result) : lJson.result;
+                // Migrate legacy data to main unified key
+                await writeToKv(GLOBAL_STORE_KEY, parsed as StoreData);
+                return parsed as StoreData;
+              }
+            }
+          } catch {
+            // ignore fallback error
+          }
+        }
+      }
+      return null;
+    }
     const parsed = typeof json.result === "string" ? JSON.parse(json.result) : json.result;
     return parsed as StoreData;
   } catch (err) {
@@ -66,7 +183,11 @@ async function writeToKv(key: string, data: StoreData): Promise<boolean> {
       },
       body: JSON.stringify(["SET", key, JSON.stringify(data)]),
     });
-    return res.ok;
+    if (!res.ok) {
+      console.error("[KV Write HTTP Error]:", res.status, await res.text());
+      return false;
+    }
+    return true;
   } catch (err) {
     console.error("[KV Write Error]:", err);
     return false;
@@ -89,8 +210,8 @@ async function readStoreFile(): Promise<StoreData> {
   }
 }
 
-export async function GET(request: Request) {
-  const storageKey = getStorageKey(request);
+export async function GET() {
+  const storageKey = getStorageKey();
   const kvCfg = getKvConfig();
 
   let data: StoreData | null = null;
@@ -121,6 +242,7 @@ export async function GET(request: Request) {
       _meta: {
         storageType,
         isCloudConnected: Boolean(kvCfg),
+        cloudSource: kvCfg?.source || "none",
         isVercel,
         storageKey,
       },
@@ -135,7 +257,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const storageKey = getStorageKey(request);
+    const storageKey = getStorageKey();
     const kvCfg = getKvConfig();
     const body = (await request.json()) as StoreData;
 
@@ -170,6 +292,7 @@ export async function POST(request: Request) {
       persistedOnCloud,
       persistedOnDisk,
       storageType: kvCfg ? "cloud-kv" : persistedOnDisk ? "local-fs" : "read-only-fallback",
+      cloudSource: kvCfg?.source || "none",
       isVercel,
       data: updated,
     });
