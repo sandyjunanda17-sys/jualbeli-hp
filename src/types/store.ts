@@ -125,6 +125,7 @@ export interface BrandConfig {
   whatsappNumber: string;
   instagramHandle: string;
   storeAddress: string;
+  mapsUrl?: string; // Link Google Maps lokasi toko (bisa disalin & dibuka langsung)
   operationalHours: string;
   announcementBar: string;
   announcementActive: boolean;

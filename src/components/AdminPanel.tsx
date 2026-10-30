@@ -42,6 +42,7 @@ import {
   Star,
   Image as ImageIcon,
   Loader2,
+  MapPin,
 } from "lucide-react";
 
 export default function AdminPanel({
@@ -637,6 +638,39 @@ export default function AdminPanel({
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm outline-none focus:border-brand-600"
                   />
                 </div>
+              </div>
+
+              {/* Google Maps Link Field */}
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-extrabold text-slate-800 flex items-center gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-brand-600" />
+                    <span>Link Google Maps Toko (Bisa Dibuka & Disalin Pelanggan)</span>
+                  </label>
+                  {brandForm.mapsUrl && (
+                    <a
+                      href={brandForm.mapsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[11px] font-bold text-brand-600 hover:text-brand-700 flex items-center gap-1"
+                    >
+                      <ExternalLink className="w-3 h-3" />
+                      <span>Cek Buka Maps</span>
+                    </a>
+                  )}
+                </div>
+                <input
+                  type="text"
+                  value={brandForm.mapsUrl || ""}
+                  onChange={(e) =>
+                    setBrandForm({ ...brandForm, mapsUrl: e.target.value })
+                  }
+                  placeholder="Contoh: https://maps.app.goo.gl/... atau https://goo.gl/maps/..."
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs bg-white outline-none focus:border-brand-600 font-mono"
+                />
+                <p className="text-[11px] text-slate-500">
+                  Cara ambil link: Buka aplikasi Google Maps &gt; cari lokasi toko Anda &gt; klik <strong>Bagikan / Share</strong> &gt; pilih <strong>Salin Link</strong> lalu tempel di sini.
+                </p>
               </div>
 
               {/* Announcement Bar */}

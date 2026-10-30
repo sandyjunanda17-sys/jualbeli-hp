@@ -1,0 +1,532 @@
+{
+  "lastUpdated": "2026-10-30T06:24:08.301Z",
+  "brandConfig": {
+    "name": "NusaPhone Official",
+    "tagline": "Pusat Jual Beli & Tukar Tambah Smartphone Bergaransi",
+    "logoUrl": "",
+    "logoTextIcon": "NP",
+    "primaryColor": "blue",
+    "whatsappNumber": "6281234567890",
+    "instagramHandle": "@nusaphone.id",
+    "storeAddress": "Jl. Jenderal Sudirman No. 88, Senayan, Jakarta Selatan",
+    "mapsUrl": "https://maps.google.com/?q=Senayan+Jakarta",
+    "operationalHours": "Senin - Minggu (09:00 - 21:00 WIB)",
+    "announcementBar": "🔥 PROMO SPESIAL: Gunakan kode NUSAPROMO untuk potongan Rp 250.000 + Gratis Ongkir Berasuransi ke Seluruh Indonesia!",
+    "announcementActive": true,
+    "adminPin": "1234",
+    "trustBadges": [
+      {
+        "title": "Lulus 35+ Titik QC",
+        "desc": "Setiap unit bekas telah melewati inspeksi hardware, layar, baterai & sensor ketat"
+      },
+      {
+        "title": "Jaminan IMEI Permanen",
+        "desc": "Garansi sinyal aman seumur hidup (Resmi Indonesia / Bea Cukai Terdaftar)"
+      },
+      {
+        "title": "Garansi Tukar Unit",
+        "desc": "Garansi toko hingga 30 hari untuk HP second & 1 tahun untuk HP baru"
+      },
+      {
+        "title": "Order Cepat via WhatsApp",
+        "desc": "Konsultasi stok, cek video fisik unit asli & transaksi langsung via chat WhatsApp"
+      }
+    ],
+    "tradeInBaseModels": [
+      {
+        "id": "ti-1",
+        "brand": "Apple",
+        "model": "iPhone 15 Pro Max",
+        "basePrice": 16500000
+      },
+      {
+        "id": "ti-2",
+        "brand": "Apple",
+        "model": "iPhone 15 Pro",
+        "basePrice": 14200000
+      },
+      {
+        "id": "ti-3",
+        "brand": "Apple",
+        "model": "iPhone 14 Pro Max",
+        "basePrice": 13200000
+      },
+      {
+        "id": "ti-4",
+        "brand": "Apple",
+        "model": "iPhone 13",
+        "basePrice": 7200000
+      },
+      {
+        "id": "ti-5",
+        "brand": "Apple",
+        "model": "iPhone 12",
+        "basePrice": 5100000
+      },
+      {
+        "id": "ti-6",
+        "brand": "Samsung",
+        "model": "Galaxy S24 Ultra 5G",
+        "basePrice": 15800000
+      },
+      {
+        "id": "ti-7",
+        "brand": "Samsung",
+        "model": "Galaxy S23 Ultra 5G",
+        "basePrice": 11900000
+      },
+      {
+        "id": "ti-8",
+        "brand": "Samsung",
+        "model": "Galaxy Z Fold 5",
+        "basePrice": 14500000
+      },
+      {
+        "id": "ti-9",
+        "brand": "Xiaomi",
+        "model": "Xiaomi 14 5G",
+        "basePrice": 8200000
+      },
+      {
+        "id": "ti-10",
+        "brand": "OPPO",
+        "model": "Find N3 Flip",
+        "basePrice": 8500000
+      }
+    ]
+  },
+  "banners": [
+    {
+      "id": "ban-1",
+      "title": "iPhone 16 Pro & 15 Pro Series Ready Stock!",
+      "subtitle": "Pilihan unit Baru Segel Resmi iBox & Second Like New BH 95-100% dengan laporan QC transparan.",
+      "badge": "GARANSI RESMI & IMEI AMAN",
+      "ctaText": "Lihat Koleksi Apple",
+      "ctaFilterBrand": "Apple",
+      "bgGradient": "from-slate-900 via-blue-950 to-indigo-950",
+      "imageUrl": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=1000&q=80",
+      "active": true
+    },
+    {
+      "id": "ban-2",
+      "title": "Samsung Galaxy S24 Ultra & Flagship Series Ready!",
+      "subtitle": "Pilihan unit Baru Segel BNIB Resmi SEIN & Second Mulus bergaransi toko dengan promo potongan harga spesial hari ini.",
+      "badge": "PROMO FLAGSHIP SAMSUNG",
+      "ctaText": "Cek Koleksi Samsung",
+      "ctaFilterBrand": "Samsung",
+      "bgGradient": "from-emerald-950 via-teal-900 to-slate-900",
+      "imageUrl": "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?auto=format&fit=crop&w=1000&q=80",
+      "active": true
+    }
+  ],
+  "products": [
+    {
+      "id": "prod-1",
+      "name": "iPhone 15 Pro Max",
+      "brand": "Apple",
+      "condition": "Bekas - Like New (Grade A+)",
+      "warranty": "Garansi Resmi iBox Aktif + Garansi Toko 30 Hari",
+      "featured": true,
+      "flashSale": true,
+      "rating": 4.9,
+      "soldCount": 48,
+      "images": [
+        "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=900&q=80",
+        "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?auto=format&fit=crop&w=900&q=80",
+        "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?auto=format&fit=crop&w=900&q=80",
+        "https://images.unsplash.com/photo-1580910051074-3eb694886505?auto=format&fit=crop&w=900&q=80"
+      ],
+      "description": "Unit istimewa pilihan kualitas Grade A+ Like New. Fisik 99% mulus tanpa penyok/dent, layar True Tone & Face ID aktif responsif, belum pernah bongkar/servis. Siap pakai dengan garansi sinyal dan mesin penuh.",
+      "variants": [
+        {
+          "id": "v-101",
+          "ram": "8GB",
+          "storage": "256GB",
+          "color": "Natural Titanium",
+          "colorHex": "#b6b1a9",
+          "price": 18499000,
+          "originalPrice": 19999000,
+          "stock": 4
+        },
+        {
+          "id": "v-102",
+          "ram": "8GB",
+          "storage": "512GB",
+          "color": "Blue Titanium",
+          "colorHex": "#384354",
+          "price": 20499000,
+          "originalPrice": 22499000,
+          "stock": 2
+        }
+      ],
+      "specs": {
+        "screen": "6.7\" LTPO Super Retina XDR OLED, 120Hz",
+        "processor": "Apple A17 Pro (3 nm)",
+        "camera": "48 MP Main + 12 MP 5x Periscope + 12 MP Ultrawide",
+        "battery": "4441 mAh, Fast Charging USB-C",
+        "os": "iOS 18 Ready",
+        "network": "5G / LTE All Operator",
+        "sim": "Dual SIM (Nano-SIM + eSIM)"
+      },
+      "inspection": {
+        "batteryHealth": "97% (Original Apple)",
+        "imeiStatus": "Resmi Indonesia (SEIN/iBox/TAM)",
+        "faceIdOrFingerprint": "Normal 100%",
+        "screenCondition": "Mulus 100% Tanpa Baret, True Tone On",
+        "bodyCondition": "99% Like New, Bezel Titanium Bersih",
+        "completeness": [
+          "Unit iPhone",
+          "Box Original Sesuai IMEI",
+          "Kabel USB-C Braided Original",
+          "Kartu Garansi & Invoice"
+        ]
+      },
+      "createdAt": "2026-10-15T08:00:00.000Z"
+    },
+    {
+      "id": "prod-2",
+      "name": "Samsung Galaxy S24 Ultra 5G",
+      "brand": "Samsung",
+      "condition": "Baru (BNIB)",
+      "warranty": "Garansi Resmi SEIN Indonesia 1 Tahun",
+      "featured": true,
+      "flashSale": false,
+      "rating": 5,
+      "soldCount": 63,
+      "images": [
+        "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?auto=format&fit=crop&w=900&q=80",
+        "https://images.unsplash.com/photo-1580910051074-3eb694886505?auto=format&fit=crop&w=900&q=80"
+      ],
+      "description": "Brand New In Box (BNIB) Segel Resmi Samsung Electronics Indonesia (SEIN). Dilengkapi Galaxy AI terbaru, S-Pen terintegrasi, rangka Titanium tangguh, dan kamera 200MP Quad Tele System.",
+      "variants": [
+        {
+          "id": "v-201",
+          "ram": "12GB",
+          "storage": "256GB",
+          "color": "Titanium Gray",
+          "colorHex": "#8d8b86",
+          "price": 18899000,
+          "originalPrice": 21999000,
+          "stock": 6
+        },
+        {
+          "id": "v-202",
+          "ram": "12GB",
+          "storage": "512GB",
+          "color": "Titanium Black",
+          "colorHex": "#2a2a2d",
+          "price": 20799000,
+          "originalPrice": 23999000,
+          "stock": 3
+        }
+      ],
+      "specs": {
+        "screen": "6.8\" Dynamic LTPO AMOLED 2X, 120Hz, 2600 nits",
+        "processor": "Snapdragon 8 Gen 3 for Galaxy",
+        "camera": "200 MP + 50 MP Periscope 5x + 10 MP + 12 MP",
+        "battery": "5000 mAh, 45W Wired Charging",
+        "os": "Android 14, One UI 6.1.1 (Galaxy AI)",
+        "network": "5G Dual Standby",
+        "sim": "Dual Nano-SIM + eSIM"
+      },
+      "inspection": {
+        "batteryHealth": "100% (Baru Segel)",
+        "imeiStatus": "Resmi Indonesia (SEIN/iBox/TAM)",
+        "faceIdOrFingerprint": "Normal 100%",
+        "screenCondition": "100% Baru Segel Pabrik",
+        "bodyCondition": "100% Baru Segel Pabrik",
+        "completeness": [
+          "Unit Segel Box Resmi",
+          "S-Pen Original",
+          "Kabel Data USB-C",
+          "Buku Panduan & Kartu Garansi SEIN"
+        ]
+      },
+      "createdAt": "2026-10-16T10:00:00.000Z"
+    },
+    {
+      "id": "prod-3",
+      "name": "iPhone 13",
+      "brand": "Apple",
+      "condition": "Bekas - Mulus (Grade A)",
+      "warranty": "Garansi Toko 30 Hari Full Coverage",
+      "featured": true,
+      "flashSale": true,
+      "rating": 4.8,
+      "soldCount": 112,
+      "images": [
+        "https://images.unsplash.com/photo-1632661674596-df8be070a5c5?auto=format&fit=crop&w=900&q=80"
+      ],
+      "description": "Best seller iPhone 13 eks Resmi Indonesia (PA/A & ID/A). Performa A15 Bionic masih sangat kencang untuk konten kreator maupun harian. Kamera jernih dengan Cinematic Mode.",
+      "variants": [
+        {
+          "id": "v-301",
+          "ram": "4GB",
+          "storage": "128GB",
+          "color": "Midnight",
+          "colorHex": "#1f242d",
+          "price": 7850000,
+          "originalPrice": 8799000,
+          "stock": 8
+        },
+        {
+          "id": "v-302",
+          "ram": "4GB",
+          "storage": "256GB",
+          "color": "Starlight",
+          "colorHex": "#f4f1ea",
+          "price": 8850000,
+          "originalPrice": 9699000,
+          "stock": 4
+        }
+      ],
+      "specs": {
+        "screen": "6.1\" Super Retina XDR OLED",
+        "processor": "Apple A15 Bionic (5 nm)",
+        "camera": "12 MP Wide OIS + 12 MP Ultrawide",
+        "battery": "3240 mAh, MagSafe Support",
+        "os": "iOS 18 Support",
+        "network": "5G All Operator Indonesia",
+        "sim": "Nano-SIM + eSIM"
+      },
+      "inspection": {
+        "batteryHealth": "89% - 93% Original",
+        "imeiStatus": "Resmi Indonesia (SEIN/iBox/TAM)",
+        "faceIdOrFingerprint": "Normal 100%",
+        "screenCondition": "Layar Original True Tone Aktif, Mulus",
+        "bodyCondition": "97% Mulus, pemakaian wajar terawat",
+        "completeness": [
+          "Unit iPhone 13",
+          "Box Fullset",
+          "Kabel Lightning to USB-C",
+          "Free Tempered Glass & Case"
+        ]
+      },
+      "createdAt": "2026-10-18T11:30:00.000Z"
+    },
+    {
+      "id": "prod-4",
+      "name": "Xiaomi 14 5G Leica Edition",
+      "brand": "Xiaomi",
+      "condition": "Bekas - Like New (Grade A+)",
+      "warranty": "Garansi Resmi Xiaomi Indonesia s/d Agustus 2027",
+      "featured": false,
+      "flashSale": false,
+      "rating": 4.9,
+      "soldCount": 29,
+      "images": [
+        "https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&w=900&q=80"
+      ],
+      "description": "Flagship compact dengan lensa optik Leica Summilux. Kondisi 99.9% seperti baru keluar toko, kelengkapan fullset original beserta charger 90W HyperCharge.",
+      "variants": [
+        {
+          "id": "v-401",
+          "ram": "12GB",
+          "storage": "256GB",
+          "color": "Jade Green",
+          "colorHex": "#1c5244",
+          "price": 9450000,
+          "originalPrice": 11999000,
+          "stock": 3
+        }
+      ],
+      "specs": {
+        "screen": "6.36\" LTPO OLED 120Hz, Dolby Vision, 3000 nits",
+        "processor": "Snapdragon 8 Gen 3 (4 nm)",
+        "camera": "Triple 50 MP Leica Summilux Optical Lens",
+        "battery": "4610 mAh, 90W Wired + 50W Wireless",
+        "os": "Android 14, HyperOS",
+        "network": "5G Resmi Indonesia",
+        "sim": "Dual SIM"
+      },
+      "inspection": {
+        "batteryHealth": "99% (Siklus Cas Rendah)",
+        "imeiStatus": "Resmi Indonesia (SEIN/iBox/TAM)",
+        "faceIdOrFingerprint": "Normal 100%",
+        "screenCondition": "100% Mulus Tanpa Gores",
+        "bodyCondition": "99% Like New",
+        "completeness": [
+          "Unit Xiaomi 14",
+          "Charger Original 90W",
+          "Box & Case Bawaan",
+          "Kartu Garansi Resmi"
+        ]
+      },
+      "createdAt": "2026-10-19T14:20:00.000Z"
+    },
+    {
+      "id": "prod-5",
+      "name": "ASUS ROG Phone 8 Pro",
+      "brand": "ASUS",
+      "condition": "Baru (BNIB)",
+      "warranty": "Garansi Resmi ASUS Indonesia 1 Tahun",
+      "featured": true,
+      "flashSale": false,
+      "rating": 4.9,
+      "soldCount": 19,
+      "images": [
+        "https://images.unsplash.com/photo-1567581935884-3349723552ca?auto=format&fit=crop&w=900&q=80"
+      ],
+      "description": "Monster gaming smartphone dengan AniMe Vision Mini-LED di bodi belakang, AirTrigger responsif, sistem pendingin GameCool 8, dan ketahanan air IP68.",
+      "variants": [
+        {
+          "id": "v-501",
+          "ram": "16GB",
+          "storage": "512GB",
+          "color": "Phantom Black",
+          "colorHex": "#161618",
+          "price": 14499000,
+          "originalPrice": 15999000,
+          "stock": 5
+        }
+      ],
+      "specs": {
+        "screen": "6.78\" LTPO AMOLED 165Hz Samsung E6",
+        "processor": "Snapdragon 8 Gen 3 (3.3 GHz)",
+        "camera": "50 MP Sony IMX890 6-axis Gimbal OIS + 32 MP Telephoto",
+        "battery": "5500 mAh, 65W HyperCharge",
+        "os": "Android 14, ROG UI",
+        "network": "5G Gaming Antenna",
+        "sim": "Dual Nano-SIM"
+      },
+      "inspection": {
+        "batteryHealth": "100% (Baru Segel)",
+        "imeiStatus": "Resmi Indonesia (SEIN/iBox/TAM)",
+        "faceIdOrFingerprint": "Normal 100%",
+        "screenCondition": "Baru Segel Pabrik",
+        "bodyCondition": "Baru Segel Pabrik",
+        "completeness": [
+          "Unit BNIB",
+          "Adaptor 65W",
+          "Kabel USB-C Braided",
+          "Aero Case Original"
+        ]
+      },
+      "createdAt": "2026-10-20T09:15:00.000Z"
+    },
+    {
+      "id": "prod-6",
+      "name": "Samsung Galaxy Z Flip 5 5G",
+      "brand": "Samsung",
+      "condition": "Bekas - Mulus (Grade A)",
+      "warranty": "Garansi Toko 30 Hari + Samsung Care+",
+      "featured": false,
+      "flashSale": true,
+      "rating": 4.7,
+      "soldCount": 34,
+      "images": [
+        "https://images.unsplash.com/photo-1678685888221-cda773a3dcdb?auto=format&fit=crop&w=900&q=80"
+      ],
+      "description": "HP lipat stylish dengan Flex Window 3.4 inci yang fungsional. Lipatan engsel rapat dan mulus, layar utama bebas deadpixel maupun shadow.",
+      "variants": [
+        {
+          "id": "v-601",
+          "ram": "8GB",
+          "storage": "256GB",
+          "color": "Mint",
+          "colorHex": "#c9e4d6",
+          "price": 8950000,
+          "originalPrice": 10999000,
+          "stock": 3
+        },
+        {
+          "id": "v-602",
+          "ram": "8GB",
+          "storage": "512GB",
+          "color": "Graphite",
+          "colorHex": "#3c3e42",
+          "price": 9750000,
+          "originalPrice": 11999000,
+          "stock": 2
+        }
+      ],
+      "specs": {
+        "screen": "6.7\" Foldable Dynamic AMOLED 2X 120Hz + 3.4\" Cover",
+        "processor": "Snapdragon 8 Gen 2 for Galaxy",
+        "camera": "12 MP Dual Pixel OIS + 12 MP Ultrawide",
+        "battery": "3700 mAh, 25W Fast Charging",
+        "os": "Android 14, One UI 6.1",
+        "network": "5G Resmi SEIN",
+        "sim": "Nano-SIM + eSIM"
+      },
+      "inspection": {
+        "batteryHealth": "95% Normal",
+        "imeiStatus": "Resmi Indonesia (SEIN/iBox/TAM)",
+        "faceIdOrFingerprint": "Normal 100%",
+        "screenCondition": "Layar Lipat Mulus, Pelindung Layar Original Terpasang",
+        "bodyCondition": "97% Mulus, Engsel Kokoh 100%",
+        "completeness": [
+          "Unit Galaxy Z Flip 5",
+          "Box Original SEIN",
+          "Kabel USB-C Original"
+        ]
+      },
+      "createdAt": "2026-10-21T16:40:00.000Z"
+    }
+  ],
+  "vouchers": [
+    {
+      "id": "voc-1",
+      "code": "NUSAPROMO",
+      "discountAmount": 250000,
+      "minPurchase": 5000000,
+      "description": "Potongan Rp 250.000 untuk pembelian minimal Rp 5 Juta",
+      "active": true
+    },
+    {
+      "id": "voc-2",
+      "code": "FLASH500",
+      "discountAmount": 500000,
+      "minPurchase": 15000000,
+      "description": "Diskon Spesial Flagship Rp 500.000 (Min. Belanja Rp 15 Juta)",
+      "active": true
+    }
+  ],
+  "orders": [
+    {
+      "id": "INV-20261029-881",
+      "customerName": "Budi Santoso",
+      "whatsapp": "081298765432",
+      "address": "Jl. Tebet Barat Dalam Raya No. 14, Jakarta Selatan",
+      "shippingMethod": "Kurir Instan Toko (Berasuransi)",
+      "paymentMethod": "Transfer Bank BCA / Virtual Account",
+      "items": [
+        {
+          "productId": "prod-1",
+          "productName": "iPhone 15 Pro Max",
+          "productImage": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=900&q=80",
+          "condition": "Bekas - Like New (Grade A+)",
+          "variantLabel": "8GB / 256GB - Natural Titanium",
+          "price": 18499000,
+          "quantity": 1
+        }
+      ],
+      "subtotal": 18499000,
+      "discount": 250000,
+      "shippingCost": 0,
+      "total": 18249000,
+      "voucherCode": "NUSAPROMO",
+      "status": "Diproses & QC",
+      "createdAt": "2026-10-29T09:30:00.000Z"
+    }
+  ],
+  "tradeIns": [
+    {
+      "id": "TRD-20261029-104",
+      "customerName": "Reza Rahadian",
+      "whatsapp": "081311223344",
+      "oldPhoneBrand": "Apple",
+      "oldPhoneModel": "iPhone 13",
+      "storage": "128GB",
+      "physicalCondition": "Mulus Sempurna (Grade A+)",
+      "completeness": "Fullset Original",
+      "batteryHealth": "88%",
+      "estimatedValue": 6950000,
+      "targetPhoneName": "iPhone 15 Pro Max (8GB/256GB)",
+      "submissionType": "Tukar Tambah (Trade-In)",
+      "status": "Menunggu Inspeksi",
+      "notes": "Ex iBox tangan pertama, nota pembelian masih ada.",
+      "createdAt": "2026-10-29T11:15:00.000Z"
+    }
+  ]
+}

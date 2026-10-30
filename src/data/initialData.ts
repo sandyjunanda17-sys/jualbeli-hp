@@ -11,6 +11,7 @@ export const INITIAL_STORE_DATA: StoreData = {
     whatsappNumber: "6281234567890",
     instagramHandle: "@nusaphone.id",
     storeAddress: "Jl. Jenderal Sudirman No. 88, Senayan, Jakarta Selatan",
+    mapsUrl: "https://maps.google.com/?q=Senayan+Jakarta",
     operationalHours: "Senin - Minggu (09:00 - 21:00 WIB)",
     announcementBar: "🔥 PROMO SPESIAL: Gunakan kode NUSAPROMO untuk potongan Rp 250.000 + Gratis Ongkir Berasuransi ke Seluruh Indonesia!",
     announcementActive: true,

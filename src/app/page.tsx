@@ -33,6 +33,9 @@ import {
   Smartphone,
   Flame,
   Lock,
+  Navigation,
+  Copy,
+  ExternalLink,
 } from "lucide-react";
 
 export default function HomePage() {
@@ -45,6 +48,7 @@ export default function HomePage() {
     compareIds,
     toggleCompare,
     toastMessage,
+    showToast,
   } = useStore();
 
   const [activeTab, setActiveTab] = useState<"catalog" | "admin">("catalog");
@@ -768,13 +772,53 @@ export default function HomePage() {
             <p className="text-xs text-slate-400 leading-relaxed max-w-sm">
               {store.brandConfig.tagline}. Setiap unit melalui proses inspeksi 35+ titik ketat dengan jaminan sinyal IMEI aman permanen.
             </p>
-            <div className="pt-2 space-y-1.5 text-xs text-slate-400">
-              <div className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-brand-500 shrink-0" />
-                <span>{store.brandConfig.storeAddress}</span>
+            <div className="pt-2 space-y-2 text-xs text-slate-400">
+              <div className="space-y-1.5">
+                <div className="flex items-start gap-2">
+                  <MapPin className="w-4 h-4 text-brand-400 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="text-slate-300 font-medium">{store.brandConfig.storeAddress}</span>
+                    <div className="pt-2 flex flex-wrap items-center gap-2">
+                      <a
+                        href={
+                          store.brandConfig.mapsUrl ||
+                          `https://maps.google.com/?q=${encodeURIComponent(
+                            store.brandConfig.storeAddress
+                          )}`
+                        }
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-brand-300 hover:text-white text-[11px] font-bold border border-slate-700 shadow-sm transition"
+                      >
+                        <Navigation className="w-3.5 h-3.5 text-brand-400" />
+                        <span>Buka di Google Maps</span>
+                        <ExternalLink className="w-2.5 h-2.5 opacity-60" />
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const targetMapsUrl =
+                            store.brandConfig.mapsUrl ||
+                            `https://maps.google.com/?q=${encodeURIComponent(
+                              store.brandConfig.storeAddress
+                            )}`;
+                          navigator.clipboard.writeText(
+                            `${store.brandConfig.name}\nAlamat: ${store.brandConfig.storeAddress}\nGoogle Maps: ${targetMapsUrl}`
+                          );
+                          showToast("Alamat & Link Google Maps berhasil disalin!");
+                        }}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white text-[11px] font-medium border border-slate-700/80 transition"
+                        title="Salin Alamat & Link Google Maps"
+                      >
+                        <Copy className="w-3.5 h-3.5" />
+                        <span>Salin Link Maps</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-brand-500 shrink-0" />
+              <div className="flex items-center gap-2 pt-1 text-slate-400">
+                <Clock className="w-4 h-4 text-brand-400 shrink-0" />
                 <span>{store.brandConfig.operationalHours}</span>
               </div>
             </div>
