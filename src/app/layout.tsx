@@ -3,9 +3,9 @@ import "./globals.css";
 import { StoreProvider } from "@/context/StoreContext";
 
 export const metadata: Metadata = {
-  title: "NusaPhone Official — Pusat Jual Beli & Tukar Tambah Smartphone Bergaransi",
+  title: "R PHONE CELL — Pusat Jual Beli & Tukar Tambah Smartphone Bergaransi",
   description:
-    "Platform jual beli HP Baru & Second berkualitas dengan laporan QC 35+ titik, jaminan IMEI permanen, dan fitur Tukar Tambah instan.",
+    "R PHONE CELL - Platform jual beli HP Baru & Second berkualitas dengan laporan QC 35+ titik, jaminan IMEI resmi permanen, dan fast response CS WhatsApp.",
 };
 
 export default function RootLayout({

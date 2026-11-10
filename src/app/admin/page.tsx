@@ -29,7 +29,9 @@ export default function AdminPage() {
   // Check existing session
   useEffect(() => {
     try {
-      const savedAuth = sessionStorage.getItem("nusaphone_admin_authed");
+      const savedAuth =
+        sessionStorage.getItem("rphone_admin_authed") ||
+        sessionStorage.getItem("nusaphone_admin_authed");
       if (savedAuth === "true") {
         setIsAuthenticated(true);
       } else {
@@ -46,7 +48,7 @@ export default function AdminPage() {
 
     if (pinInput.trim() === correctPin.trim()) {
       try {
-        sessionStorage.setItem("nusaphone_admin_authed", "true");
+        sessionStorage.setItem("rphone_admin_authed", "true");
       } catch {}
       setIsAuthenticated(true);
       setErrorMsg("");
@@ -59,6 +61,7 @@ export default function AdminPage() {
 
   const handleLogout = () => {
     try {
+      sessionStorage.removeItem("rphone_admin_authed");
       sessionStorage.removeItem("nusaphone_admin_authed");
     } catch {}
     setIsAuthenticated(false);
@@ -187,7 +190,7 @@ export default function AdminPage() {
         </div>
 
         <div className="max-w-md w-full mx-auto pb-4 text-center text-[11px] text-slate-600">
-          NusaPhone CMS Security Engine • Protected White-Label Architecture
+          R PHONE CELL CMS Security Engine • Protected White-Label Architecture
         </div>
       </div>
     );

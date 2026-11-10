@@ -304,7 +304,7 @@ export default function CartCheckoutDrawer({ isOpen, onClose }: CartCheckoutDraw
                         type="text"
                         value={voucherInput}
                         onChange={(e) => setVoucherInput(e.target.value)}
-                        placeholder="Contoh: NUSAPROMO"
+                        placeholder="Contoh: R PHONE CELL"
                         className="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-xs uppercase font-bold outline-none focus:border-brand-500 bg-white"
                       />
                       <button

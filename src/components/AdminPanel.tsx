@@ -517,7 +517,7 @@ export default function AdminPanel({
                         logoTextIcon: e.target.value.toUpperCase(),
                       })
                     }
-                    placeholder="NP"
+                    placeholder="RP"
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-bold text-slate-900 outline-none focus:border-brand-600"
                   />
                 </div>
@@ -562,7 +562,7 @@ export default function AdminPanel({
                     </div>
                   ) : (
                     <div className="w-16 h-16 rounded-2xl bg-brand-600 text-white flex items-center justify-center font-black text-xl">
-                      {brandForm.logoTextIcon || "NP"}
+                      {brandForm.logoTextIcon || "RP"}
                     </div>
                   )}
 

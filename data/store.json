@@ -1,16 +1,17 @@
 {
-  "lastUpdated": "2026-10-30T06:24:08.301Z",
+  "lastUpdated": "2026-11-10T08:00:00.000Z",
   "brandConfig": {
-    "name": "NusaPhone Official",
+    "name": "R PHONE CELL",
     "tagline": "Pusat Jual Beli & Tukar Tambah Smartphone Bergaransi",
     "logoUrl": "",
-    "logoTextIcon": "NP",
-    "primaryColor": "blue",
-    "whatsappNumber": "6281234567890",
-    "instagramHandle": "@nusaphone.id",
-    "storeAddress": "Jl. Jenderal Sudirman No. 88, Senayan, Jakarta Selatan",
+    "logoTextIcon": "RP",
+    "primaryColor": "violet",
+    "whatsappNumber": "6283152106847",
+    "instagramHandle": "@rphonecell.id",
+    "storeAddress": "Jakarta Utara, DKI Jakarta",
+    "mapsUrl": "https://maps.google.com/?q=Jakarta+Utara",
     "operationalHours": "Senin - Minggu (09:00 - 21:00 WIB)",
-    "announcementBar": "🔥 PROMO SPESIAL: Gunakan kode NUSAPROMO untuk potongan Rp 250.000 + Gratis Ongkir Berasuransi ke Seluruh Indonesia!",
+    "announcementBar": "🔥 PROMO SPESIAL: Gunakan kode R PHONE CELL untuk potongan Rp 250.000 + Gratis Ongkir Berasuransi ke Seluruh Indonesia!",
     "announcementActive": true,
     "adminPin": "1234",
     "trustBadges": [
@@ -466,15 +467,15 @@
   "vouchers": [
     {
       "id": "voc-1",
-      "code": "NUSAPROMO",
+      "code": "R PHONE CELL",
       "discountAmount": 250000,
       "minPurchase": 5000000,
-      "description": "Potongan Rp 250.000 untuk pembelian minimal Rp 5 Juta",
+      "description": "Potongan Rp 250.000 Promo Spesial R PHONE CELL",
       "active": true
     },
     {
       "id": "voc-2",
-      "code": "FLASH500",
+      "code": "RPHONE500",
       "discountAmount": 500000,
       "minPurchase": 15000000,
       "description": "Diskon Spesial Flagship Rp 500.000 (Min. Belanja Rp 15 Juta)",
@@ -504,7 +505,7 @@
       "discount": 250000,
       "shippingCost": 0,
       "total": 18249000,
-      "voucherCode": "NUSAPROMO",
+      "voucherCode": "R PHONE CELL",
       "status": "Diproses & QC",
       "createdAt": "2026-10-29T09:30:00.000Z"
     }

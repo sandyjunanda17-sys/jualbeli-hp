@@ -67,9 +67,70 @@ interface StoreContextType {
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
-const STORAGE_KEY = "nusaphone_store_data_v1";
-const CART_KEY = "nusaphone_cart_v1";
-const WISHLIST_KEY = "nusaphone_wishlist_v1";
+const STORAGE_KEY = "rphone_store_data_v1";
+const LEGACY_STORAGE_KEY = "nusaphone_store_data_v1";
+const CART_KEY = "rphone_cart_v1";
+const LEGACY_CART_KEY = "nusaphone_cart_v1";
+const WISHLIST_KEY = "rphone_wishlist_v1";
+const LEGACY_WISHLIST_KEY = "nusaphone_wishlist_v1";
+
+function sanitizeClientStore(data: StoreData): StoreData {
+  if (!data) return INITIAL_STORE_DATA;
+  const brand = { ...(data.brandConfig || INITIAL_STORE_DATA.brandConfig) };
+  let modified = false;
+
+  if (!brand.name || brand.name.toLowerCase().includes("nusaphone")) {
+    brand.name = "R PHONE CELL";
+    modified = true;
+  }
+  if (!brand.primaryColor || brand.primaryColor === "blue") {
+    brand.primaryColor = "violet";
+    modified = true;
+  }
+  if (!brand.logoTextIcon || brand.logoTextIcon === "NP") {
+    brand.logoTextIcon = "RP";
+    modified = true;
+  }
+  if (!brand.tagline || brand.tagline.toLowerCase().includes("nusa")) {
+    brand.tagline = "Pusat Jual Beli & Tukar Tambah Smartphone Bergaransi";
+    modified = true;
+  }
+  if (
+    !brand.announcementBar ||
+    brand.announcementBar.includes("NUSAPROMO") ||
+    brand.announcementBar.toLowerCase().includes("nusaphone")
+  ) {
+    brand.announcementBar =
+      "🔥 PROMO SPESIAL: Gunakan kode R PHONE CELL untuk potongan Rp 250.000 + Gratis Ongkir Berasuransi ke Seluruh Indonesia!";
+    modified = true;
+  }
+  if (!brand.whatsappNumber || brand.whatsappNumber === "6281234567890") {
+    brand.whatsappNumber = "6283152106847";
+    modified = true;
+  }
+  if (!brand.storeAddress || brand.storeAddress.includes("ITC Roxy Mas")) {
+    brand.storeAddress = "Jakarta Utara, DKI Jakarta";
+    modified = true;
+  }
+
+  let vouchers = data.vouchers;
+  if (vouchers && vouchers.some((v) => v.code === "NUSAPROMO" || v.code.includes("NUSA"))) {
+    vouchers = vouchers.map((v) =>
+      v.code === "NUSAPROMO" || v.code.includes("NUSA")
+        ? {
+            ...v,
+            code: "R PHONE CELL",
+            description: "Potongan Rp 250.000 untuk semua smartphone baru & second berkualitas",
+          }
+        : v
+    );
+    modified = true;
+  }
+
+  return modified
+    ? { ...data, brandConfig: brand, vouchers: vouchers || INITIAL_STORE_DATA.vouchers }
+    : data;
+}
 
 const COLOR_PALETTES: Record<
   BrandConfig["primaryColor"],
@@ -148,14 +209,26 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     async function init() {
       let localData: StoreData | null = null;
       try {
-        const rawLocal = localStorage.getItem(STORAGE_KEY);
+        const rawLocal =
+          localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
         if (rawLocal) {
-          localData = JSON.parse(rawLocal);
+          localData = sanitizeClientStore(JSON.parse(rawLocal));
+          setStore(localData);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(localData));
+          localStorage.removeItem(LEGACY_STORAGE_KEY);
         }
-        const rawCart = localStorage.getItem(CART_KEY);
-        if (rawCart) setCart(JSON.parse(rawCart));
-        const rawWish = localStorage.getItem(WISHLIST_KEY);
-        if (rawWish) setWishlist(JSON.parse(rawWish));
+        const rawCart =
+          localStorage.getItem(CART_KEY) || localStorage.getItem(LEGACY_CART_KEY);
+        if (rawCart) {
+          setCart(JSON.parse(rawCart));
+          localStorage.removeItem(LEGACY_CART_KEY);
+        }
+        const rawWish =
+          localStorage.getItem(WISHLIST_KEY) || localStorage.getItem(LEGACY_WISHLIST_KEY);
+        if (rawWish) {
+          setWishlist(JSON.parse(rawWish));
+          localStorage.removeItem(LEGACY_WISHLIST_KEY);
+        }
       } catch {
         // ignore storage errors
       }
@@ -167,7 +240,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           if (resJson._meta) {
             setMetaInfo(resJson._meta);
           }
-          const serverData = resJson as StoreData;
+          const serverData = sanitizeClientStore(resJson as StoreData);
           // Choose whichever has newer timestamp if localData exists
           if (
             localData &&
@@ -203,7 +276,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   // Apply dynamic CSS variables whenever brandConfig.primaryColor changes
   useEffect(() => {
-    const palette = COLOR_PALETTES[store.brandConfig.primaryColor] || COLOR_PALETTES.blue;
+    const palette = COLOR_PALETTES[store.brandConfig.primaryColor] || COLOR_PALETTES.violet;
     const root = document.documentElement;
     root.style.setProperty("--brand-50", palette[50]);
     root.style.setProperty("--brand-100", palette[100]);
@@ -346,7 +419,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   };
 
   const importStoreJson = async (jsonData: StoreData) => {
-    await persistStore(jsonData);
+    const sanitized = sanitizeClientStore(jsonData);
+    await persistStore(sanitized);
     showToast("Database toko berhasil di-import!");
   };
 

@@ -998,7 +998,7 @@ export default function HomePage() {
                 </div>
               ) : (
                 <div className="w-10 h-10 rounded-xl bg-brand-600 text-white font-black flex items-center justify-center">
-                  {store.brandConfig.logoTextIcon || "NP"}
+                  {store.brandConfig.logoTextIcon || "RP"}
                 </div>
               )}
               <span className="text-lg font-extrabold text-white">

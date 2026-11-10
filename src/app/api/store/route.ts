@@ -107,6 +107,64 @@ function getKvConfig(): { url: string; token: string; source: string } | null {
   return null;
 }
 
+// Data sanitizer to guarantee "NusaPhone" or blue default never slips through
+function sanitizeStoreData(data: StoreData): { sanitized: StoreData; wasModified: boolean } {
+  if (!data) return { sanitized: INITIAL_STORE_DATA, wasModified: true };
+  let wasModified = false;
+  const brand = { ...(data.brandConfig || INITIAL_STORE_DATA.brandConfig) };
+
+  if (!brand.name || brand.name.toLowerCase().includes("nusaphone")) {
+    brand.name = "R PHONE CELL";
+    wasModified = true;
+  }
+  if (!brand.primaryColor || brand.primaryColor === "blue") {
+    brand.primaryColor = "violet";
+    wasModified = true;
+  }
+  if (!brand.logoTextIcon || brand.logoTextIcon === "NP") {
+    brand.logoTextIcon = "RP";
+    wasModified = true;
+  }
+  if (!brand.tagline || brand.tagline.toLowerCase().includes("nusa")) {
+    brand.tagline = "Pusat Jual Beli & Tukar Tambah Smartphone Bergaransi";
+    wasModified = true;
+  }
+  if (!brand.announcementBar || brand.announcementBar.includes("NUSAPROMO") || brand.announcementBar.toLowerCase().includes("nusaphone")) {
+    brand.announcementBar = "🔥 PROMO SPESIAL: Gunakan kode R PHONE CELL untuk potongan Rp 250.000 + Gratis Ongkir Berasuransi ke Seluruh Indonesia!";
+    wasModified = true;
+  }
+  if (!brand.whatsappNumber || brand.whatsappNumber === "6281234567890") {
+    brand.whatsappNumber = "6283152106847";
+    wasModified = true;
+  }
+  if (!brand.storeAddress || brand.storeAddress.includes("ITC Roxy Mas")) {
+    brand.storeAddress = "Jakarta Utara, DKI Jakarta";
+    wasModified = true;
+  }
+
+  let vouchers = data.vouchers;
+  if (vouchers && vouchers.some((v) => v.code === "NUSAPROMO" || v.code.includes("NUSA"))) {
+    vouchers = vouchers.map((v) =>
+      v.code === "NUSAPROMO" || v.code.includes("NUSA")
+        ? {
+            ...v,
+            code: "R PHONE CELL",
+            description: "Potongan Rp 250.000 untuk semua smartphone baru & second berkualitas",
+          }
+        : v
+    );
+    wasModified = true;
+  }
+
+  const sanitized: StoreData = {
+    ...data,
+    brandConfig: brand,
+    vouchers: vouchers || INITIAL_STORE_DATA.vouchers,
+  };
+
+  return { sanitized, wasModified };
+}
+
 // Read from Upstash KV using Command API
 async function readFromKv(key: string): Promise<StoreData | null> {
   const cfg = getKvConfig();
@@ -150,9 +208,10 @@ async function readFromKv(key: string): Promise<StoreData | null> {
               if (lJson.result) {
                 const parsed =
                   typeof lJson.result === "string" ? JSON.parse(lJson.result) : lJson.result;
+                const { sanitized } = sanitizeStoreData(parsed as StoreData);
                 // Migrate legacy data to main unified key
-                await writeToKv(GLOBAL_STORE_KEY, parsed as StoreData);
-                return parsed as StoreData;
+                await writeToKv(GLOBAL_STORE_KEY, sanitized);
+                return sanitized;
               }
             }
           } catch {
@@ -163,7 +222,14 @@ async function readFromKv(key: string): Promise<StoreData | null> {
       return null;
     }
     const parsed = typeof json.result === "string" ? JSON.parse(json.result) : json.result;
-    return parsed as StoreData;
+    const { sanitized, wasModified } = sanitizeStoreData(parsed as StoreData);
+
+    if (wasModified) {
+      // Re-save sanitized data back to KV so it's permanently cleaned
+      await writeToKv(key, sanitized);
+    }
+
+    return sanitized;
   } catch (err) {
     console.error("[KV Read Error]:", err);
     return null;
@@ -198,7 +264,9 @@ async function writeToKv(key: string, data: StoreData): Promise<boolean> {
 async function readStoreFile(): Promise<StoreData> {
   try {
     const raw = await fs.readFile(DATA_FILE, "utf-8");
-    return JSON.parse(raw) as StoreData;
+    const parsed = JSON.parse(raw) as StoreData;
+    const { sanitized } = sanitizeStoreData(parsed);
+    return sanitized;
   } catch {
     try {
       await fs.mkdir(DATA_DIR, { recursive: true });
@@ -234,6 +302,13 @@ export async function GET() {
     }
   }
 
+  // Double check sanitization before responding
+  const { sanitized, wasModified } = sanitizeStoreData(data);
+  data = sanitized;
+  if (wasModified && kvCfg) {
+    await writeToKv(storageKey, data);
+  }
+
   const isVercel = Boolean(process.env.VERCEL);
 
   return NextResponse.json(
@@ -261,8 +336,11 @@ export async function POST(request: Request) {
     const kvCfg = getKvConfig();
     const body = (await request.json()) as StoreData;
 
+    // Sanitize before persisting
+    const { sanitized } = sanitizeStoreData(body);
+
     const updated: StoreData = {
-      ...body,
+      ...sanitized,
       lastUpdated: new Date().toISOString(),
     };
 
