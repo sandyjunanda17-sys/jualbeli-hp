@@ -1,7 +1,7 @@
 import { StoreData } from "@/types/store";
 
 export const INITIAL_STORE_DATA: StoreData = {
-  lastUpdated: new Date().toISOString(),
+  lastUpdated: "2026-01-01T00:00:00.000Z",
   brandConfig: {
     name: "R PHONE CELL",
     tagline: "Pusat Jual Beli & Tukar Tambah Smartphone Bergaransi",

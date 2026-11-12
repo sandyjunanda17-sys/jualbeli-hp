@@ -75,6 +75,13 @@ export default function HomePage() {
   // Live Flash Sale Urgency Countdown Timer (ticks every second)
   const [timeLeft, setTimeLeft] = useState({ hours: 3, minutes: 24, seconds: 18 });
 
+  // Pagination for high performance (handles 100+ to 1000+ products seamlessly)
+  const [visibleCount, setVisibleCount] = useState(12);
+
+  useEffect(() => {
+    setVisibleCount(12);
+  }, [selectedBrand, selectedCondition, selectedPriceRange, onlyFlashSale, searchQuery, sortBy]);
+
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
@@ -147,6 +154,10 @@ export default function HomePage() {
     searchQuery,
     sortBy,
   ]);
+
+  const displayedProducts = useMemo(() => {
+    return filteredProducts.slice(0, visibleCount);
+  }, [filteredProducts, visibleCount]);
 
   const wishlistProducts = store.products.filter((p) =>
     wishlist.includes(p.id)
@@ -252,7 +263,7 @@ export default function HomePage() {
                 <div className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
                   <h2 className="text-xs font-black uppercase tracking-wider text-slate-900">
-                    {selectedBrand === "ALL" ? "6 HP Pilihan Siap Kirim" : `Koleksi ${selectedBrand}`}
+                    {selectedBrand === "ALL" ? "Koleksi Smartphone Siap Kirim" : `Koleksi ${selectedBrand}`}
                   </h2>
                   <span className="text-[10px] text-slate-400 font-bold">
                     ({filteredProducts.length} Unit Ready)
@@ -534,7 +545,7 @@ export default function HomePage() {
               </div>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-6">
-                {filteredProducts.map((product) => {
+                {displayedProducts.map((product) => {
                   const primaryVariant = product.variants[0];
                   const badge = getConditionBadgeStyle(product.condition);
                   const isWished = wishlist.includes(product.id);
@@ -771,6 +782,24 @@ export default function HomePage() {
                     </div>
                   );
                 })}
+
+                {/* Load More Button for 100+ Catalog Performance */}
+                {filteredProducts.length > visibleCount && (
+                  <div className="col-span-full pt-6 pb-2 text-center space-y-2">
+                    <button
+                      onClick={() => setVisibleCount((prev) => prev + 12)}
+                      className="px-6 py-3 rounded-2xl bg-brand-600 hover:bg-brand-700 text-white font-extrabold text-xs shadow-md shadow-brand-500/25 transition active:scale-95 inline-flex items-center gap-2"
+                    >
+                      <span>Muat Lebih Banyak Unit (+12 Unit)</span>
+                      <span className="px-2 py-0.5 rounded-full bg-white/20 text-[10px]">
+                        Tersisa {filteredProducts.length - visibleCount} Unit
+                      </span>
+                    </button>
+                    <p className="text-[11px] text-slate-400 font-medium">
+                      Menampilkan <strong>{Math.min(visibleCount, filteredProducts.length)}</strong> dari <strong>{filteredProducts.length}</strong> unit siap kirim
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 

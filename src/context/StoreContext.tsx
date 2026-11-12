@@ -241,21 +241,41 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
             setMetaInfo(resJson._meta);
           }
           const serverData = sanitizeClientStore(resJson as StoreData);
-          // Choose whichever has newer timestamp if localData exists
-          if (
+
+          // Data Safety Guard:
+          // 1. If localData has more products or custom added items, NEVER allow an empty/default server to delete them!
+          // 2. If localData is newer than serverData, prefer localData and push to server.
+          // 3. Otherwise, use serverData and safely merge any unique local products.
+          const localTime = localData ? new Date(localData.lastUpdated).getTime() : 0;
+          const serverTime = new Date(serverData.lastUpdated).getTime();
+          const localProdCount = localData?.products?.length || 0;
+          const serverProdCount = serverData?.products?.length || 0;
+
+          const preferLocal =
             localData &&
-            new Date(localData.lastUpdated).getTime() > new Date(serverData.lastUpdated).getTime()
-          ) {
+            (localTime > serverTime || (localProdCount > serverProdCount && serverProdCount <= 6));
+
+          if (preferLocal && localData) {
             setStore(localData);
-            // Push newer local data to server
+            // Push newer/larger local data to server to preserve it
             await fetch("/api/store", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(localData),
             });
           } else {
+            // Merge any unique products from localData that might be missing in serverData
+            if (localData && localProdCount > 0) {
+              const serverIds = new Set(serverData.products.map((p) => p.id));
+              const missingLocalProducts = localData.products.filter((p) => !serverIds.has(p.id));
+              if (missingLocalProducts.length > 0) {
+                serverData.products = [...serverData.products, ...missingLocalProducts];
+              }
+            }
             setStore(serverData);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(serverData));
+            try {
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(serverData));
+            } catch {}
           }
           setSyncStatus("synced");
         } else if (localData) {
@@ -353,9 +373,26 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   };
 
   const deleteProduct = async (id: string) => {
+    const targetProduct = store.products.find((p) => p.id === id);
     const nextProducts = store.products.filter((p) => p.id !== id);
+    
+    // 1. Update database Supabase & localStorage
     await persistStore({ ...store, products: nextProducts });
-    showToast("Produk berhasil dihapus dari katalog.");
+
+    // 2. Bersihkan berkas foto produk dari Supabase Storage bucket agar kuota tidak mubazir
+    if (targetProduct && targetProduct.images && targetProduct.images.length > 0) {
+      try {
+        await fetch("/api/upload", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ urls: targetProduct.images }),
+        });
+      } catch (err) {
+        console.warn("[Storage Cleanup Warning]:", err);
+      }
+    }
+
+    showToast("Produk & berkas foto berhasil dihapus permanen dari Supabase.");
   };
 
   const saveBanner = async (banner: PromoBanner) => {

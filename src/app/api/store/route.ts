@@ -3,6 +3,11 @@ import fs from "fs/promises";
 import path from "path";
 import { INITIAL_STORE_DATA } from "@/data/initialData";
 import { StoreData } from "@/types/store";
+import {
+  fetchStoreFromSupabase,
+  saveStoreToSupabase,
+  isSupabaseConfigured,
+} from "@/lib/supabase";
 
 const DATA_DIR = path.join(process.cwd(), "data");
 const DATA_FILE = path.join(DATA_DIR, "store.json");
@@ -279,24 +284,42 @@ async function readStoreFile(): Promise<StoreData> {
 }
 
 export async function GET() {
-  const storageKey = getStorageKey();
+  const supabaseActive = isSupabaseConfigured();
   const kvCfg = getKvConfig();
+  const storageKey = getStorageKey();
 
   let data: StoreData | null = null;
   let storageType = "local-fs";
 
-  if (kvCfg) {
-    data = await readFromKv(storageKey);
+  // 1. Primary: Try Supabase PostgreSQL (Supports 1000+ catalog products, never loses data)
+  if (supabaseActive) {
+    data = await fetchStoreFromSupabase();
     if (data) {
-      storageType = "cloud-kv";
+      storageType = "supabase-postgres";
     }
   }
 
-  // Fallback to local file or initial data if not found in KV
+  // 2. Secondary: Try Upstash KV if Supabase didn't return data
+  if (!data && kvCfg) {
+    data = await readFromKv(storageKey);
+    if (data) {
+      storageType = "cloud-kv";
+      // If Supabase is active but empty, auto-migrate Upstash data into Supabase!
+      if (supabaseActive) {
+        await saveStoreToSupabase(data);
+        storageType = "supabase-postgres";
+      }
+    }
+  }
+
+  // 3. Fallback: Local file or initial data
   if (!data) {
     data = await readStoreFile();
-    // If KV is connected but empty, seed KV with initial data!
-    if (kvCfg) {
+    // Seed database if connected but empty
+    if (supabaseActive) {
+      await saveStoreToSupabase(data);
+      storageType = "supabase-postgres";
+    } else if (kvCfg) {
       await writeToKv(storageKey, data);
       storageType = "cloud-kv";
     }
@@ -305,8 +328,12 @@ export async function GET() {
   // Double check sanitization before responding
   const { sanitized, wasModified } = sanitizeStoreData(data);
   data = sanitized;
-  if (wasModified && kvCfg) {
-    await writeToKv(storageKey, data);
+  if (wasModified) {
+    if (supabaseActive) {
+      await saveStoreToSupabase(data);
+    } else if (kvCfg) {
+      await writeToKv(storageKey, data);
+    }
   }
 
   const isVercel = Boolean(process.env.VERCEL);
@@ -316,8 +343,10 @@ export async function GET() {
       ...data,
       _meta: {
         storageType,
-        isCloudConnected: Boolean(kvCfg),
-        cloudSource: kvCfg?.source || "none",
+        isCloudConnected: Boolean(supabaseActive || kvCfg),
+        cloudSource: supabaseActive
+          ? "supabase-postgres"
+          : kvCfg?.source || "none",
         isVercel,
         storageKey,
       },
@@ -332,8 +361,9 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const storageKey = getStorageKey();
+    const supabaseActive = isSupabaseConfigured();
     const kvCfg = getKvConfig();
+    const storageKey = getStorageKey();
     const body = (await request.json()) as StoreData;
 
     // Sanitize before persisting
@@ -347,12 +377,18 @@ export async function POST(request: Request) {
     let persistedOnCloud = false;
     let persistedOnDisk = false;
 
-    // 1. Persist to Cloud KV if available
-    if (kvCfg) {
-      persistedOnCloud = await writeToKv(storageKey, updated);
+    // 1. Primary: Persist to Supabase PostgreSQL
+    if (supabaseActive) {
+      persistedOnCloud = await saveStoreToSupabase(updated);
     }
 
-    // 2. Persist to local disk if writable (VPS / localhost)
+    // 2. Secondary: Dual backup to Upstash KV if configured
+    if (kvCfg) {
+      const kvOk = await writeToKv(storageKey, updated);
+      if (!persistedOnCloud) persistedOnCloud = kvOk;
+    }
+
+    // 3. Persist to local disk if writable (VPS / localhost)
     try {
       await fs.mkdir(DATA_DIR, { recursive: true });
       await fs.writeFile(DATA_FILE, JSON.stringify(updated, null, 2), "utf-8");
@@ -369,8 +405,14 @@ export async function POST(request: Request) {
       persistedOnServer,
       persistedOnCloud,
       persistedOnDisk,
-      storageType: kvCfg ? "cloud-kv" : persistedOnDisk ? "local-fs" : "read-only-fallback",
-      cloudSource: kvCfg?.source || "none",
+      storageType: supabaseActive
+        ? "supabase-postgres"
+        : kvCfg
+        ? "cloud-kv"
+        : persistedOnDisk
+        ? "local-fs"
+        : "read-only-fallback",
+      cloudSource: supabaseActive ? "supabase-postgres" : kvCfg?.source || "none",
       isVercel,
       data: updated,
     });

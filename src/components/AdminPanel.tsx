@@ -14,7 +14,7 @@ import {
   Voucher,
 } from "@/types/store";
 import { buildWhatsAppUrl, formatRupiah, formatShortDate } from "@/utils/format";
-import { processImageFile } from "@/utils/imageOptimizer";
+import { processImageFile, uploadOrProcessImage } from "@/utils/imageOptimizer";
 import {
   Palette,
   Smartphone,
@@ -161,7 +161,7 @@ export default function AdminPanel({
     const file = e.target.files?.[0];
     if (!file) return;
     try {
-      const optimized = await processImageFile(file, 400, 400, 0.9);
+      const optimized = await uploadOrProcessImage(file);
       setBrandForm((prev) => ({ ...prev, logoUrl: optimized }));
       showToast("Logo berhasil dimuat & dioptimasi otomatis!");
     } catch {
@@ -187,7 +187,7 @@ export default function AdminPanel({
     try {
       const processed: string[] = [];
       for (const file of filesToProcess) {
-        const dataUrl = await processImageFile(file, 1000, 1000, 0.82);
+        const dataUrl = await uploadOrProcessImage(file);
         processed.push(dataUrl);
       }
       setEditingProduct({
@@ -231,6 +231,25 @@ export default function AdminPanel({
     imgs.unshift(selected);
     setEditingProduct({ ...editingProduct, images: imgs });
     showToast("Foto utama produk berhasil diatur!");
+  };
+
+  // Remove photo slot & cleanup from Supabase Storage
+  const handleRemoveProductImageSlot = async (idx: number) => {
+    if (!editingProduct) return;
+    const removedUrl = editingProduct.images[idx];
+    const nextImages = editingProduct.images.filter((_, i) => i !== idx);
+    setEditingProduct({ ...editingProduct, images: nextImages });
+
+    if (removedUrl && removedUrl.includes("/rphone-images/")) {
+      try {
+        await fetch("/api/upload", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ urls: [removedUrl] }),
+        });
+      } catch {}
+    }
+    showToast("Foto berhasil dihapus.");
   };
 
   // Move photo left/right
@@ -914,7 +933,15 @@ export default function AdminPanel({
                       <span>Edit Lengkap</span>
                     </button>
                     <button
-                      onClick={() => deleteProduct(prod.id)}
+                      onClick={() => {
+                        if (
+                          window.confirm(
+                            `Hapus produk "${prod.name}"?\nData katalog dan seluruh foto di Supabase Storage akan dihapus bersih.`
+                          )
+                        ) {
+                          deleteProduct(prod.id);
+                        }
+                      }}
                       className="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 transition"
                       title="Hapus Produk"
                     >
@@ -1545,20 +1572,26 @@ export default function AdminPanel({
                     </h3>
                     <span
                       className={`text-[11px] font-black px-2.5 py-0.5 rounded-full ${
-                        metaInfo?.isCloudConnected
-                          ? "bg-emerald-100 text-emerald-800"
+                        metaInfo?.storageType === "supabase-postgres"
+                          ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                          : metaInfo?.isCloudConnected
+                          ? "bg-teal-100 text-teal-800"
                           : "bg-blue-100 text-blue-800"
                       }`}
                     >
-                      {metaInfo?.isCloudConnected
+                      {metaInfo?.storageType === "supabase-postgres"
+                        ? "⚡ SUPABASE POSTGRESQL AKTIF (KAPASITAS TINGGI 100+ PRODUK)"
+                        : metaInfo?.isCloudConnected
                         ? "🟢 CLOUD KV AKTIF (ONLINE)"
-                        : "🔵 SERVER FILE (data/store.json)"}
+                        : "🔵 SERVER FILE LOKAL"}
                     </span>
                   </div>
                   <p className="text-xs text-slate-600 mt-0.5">
-                    {metaInfo?.isCloudConnected
-                      ? "Semua editan produk, stok, dan branding otomatis tersimpan di Cloud. Customer yang membuka link website ini akan langsung melihat perubahan Anda!"
-                      : "Data tersimpan di server lokal (data/store.json). Untuk deployment di Vercel agar customer melihat editan Anda dari HP mereka, aktifkan Vercel KV (Gratis)."}
+                    {metaInfo?.storageType === "supabase-postgres"
+                      ? "Terhubung ke Supabase PostgreSQL & Storage Cloud CDN. Kapasitas hingga ribuan produk (100+ produk), foto tersimpan permanen dan tidak akan pernah hilang!"
+                      : metaInfo?.isCloudConnected
+                      ? "Terhubung ke Cloud KV. Data tersimpan online. Untuk toko dengan 100+ produk & foto berkapasitas besar, sambungkan ke Supabase (Gratis)."
+                      : "Data saat ini tersimpan sementara. Sambungkan ke Supabase (PostgreSQL) agar katalog produk tersimpan permanen dan mampu menampung 100+ produk."}
                   </p>
                 </div>
               </div>
@@ -1579,20 +1612,24 @@ export default function AdminPanel({
               </button>
             </div>
 
-            {/* Vercel KV Guide if not connected */}
-            {!metaInfo?.isCloudConnected && (
+            {/* Supabase Guide */}
+            {metaInfo?.storageType !== "supabase-postgres" && (
               <div className="mt-3 pt-3 border-t border-slate-200/80 text-xs text-slate-600 space-y-1.5">
-                <p className="font-bold text-slate-800">
-                  💡 Tips Deploy di Vercel (100% Gratis & Beli Putus):
+                <p className="font-bold text-slate-800 flex items-center gap-1.5">
+                  <span>🚀</span>
+                  <span>Solusi Permanen Toko R PHONE CELL: Sambungkan ke Supabase (100% Gratis & Kuat 100+ Produk)</span>
                 </p>
                 <p>
-                  1. Di dashboard project Vercel Anda, klik tab <strong>Storage</strong> → klik <strong>Create Database</strong> → pilih <strong>KV (Upstash)</strong>.
+                  1. Buat akun & project gratis di <strong>supabase.com</strong>.
                 </p>
                 <p>
-                  2. Klik <strong>Connect</strong> ke project ini. Vercel otomatis mengisi variabel <code>KV_REST_API_URL</code> & <code>KV_REST_API_TOKEN</code>.
+                  2. Jalankan script SQL pembuatan tabel di tab <strong>SQL Editor</strong> Supabase.
                 </p>
                 <p>
-                  3. Klik <strong>Redeploy</strong> di Vercel. Status di atas akan otomatis berubah menjadi <strong>🟢 CLOUD KV AKTIF</strong> dan customer langsung melihat seluruh produk hasil editan Anda!
+                  3. Masukkan <code>NEXT_PUBLIC_SUPABASE_URL</code> dan <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code> ke menu <strong>Settings → Environment Variables</strong> di Vercel.
+                </p>
+                <p className="text-emerald-700 font-semibold">
+                  ✓ Setelah terhubung, status di atas akan langsung berubah menjadi <strong>⚡ SUPABASE POSTGRESQL AKTIF</strong>, katalog 100+ produk tidak akan pernah hilang lagi!
                 </p>
               </div>
             )}
@@ -1893,14 +1930,7 @@ export default function AdminPanel({
 
                               <button
                                 type="button"
-                                onClick={() =>
-                                  setEditingProduct({
-                                    ...editingProduct,
-                                    images: editingProduct.images.filter(
-                                      (_, i) => i !== slotIdx
-                                    ),
-                                  })
-                                }
+                                onClick={() => handleRemoveProductImageSlot(slotIdx)}
                                 className="w-5 h-5 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-xs flex items-center justify-center shadow"
                                 title="Hapus foto ini"
                               >

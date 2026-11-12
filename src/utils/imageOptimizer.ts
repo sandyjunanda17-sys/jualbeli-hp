@@ -1,13 +1,13 @@
 /**
  * Utility untuk memproses, mengompres, dan menyesuaikan ukuran gambar secara otomatis
  * Mendukung semua format gambar (JPG, PNG, WEBP, GIF, HEIC, BMP, dll.)
- * Mengubah gambar kamera resolusi tinggi menjadi format WebP/JPEG ringan yang tajam
+ * Terintegrasi langsung dengan Supabase Storage Cloud CDN dengan fallback WebP ringan
  */
 export function processImageFile(
   file: File,
-  maxWidth = 1000,
-  maxHeight = 1000,
-  quality = 0.82
+  maxWidth = 850,
+  maxHeight = 850,
+  quality = 0.76
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     // Validasi tipe file
@@ -80,4 +80,31 @@ export function processImageFile(
     reader.onerror = () => reject(new Error("Gagal membuka file dari perangkat."));
     reader.readAsDataURL(file);
   });
+}
+
+/**
+ * Upload gambar langsung ke Supabase Storage Cloud CDN (jika sudah diset),
+ * atau fallback otomatis ke format WebP super ringan & tajam (< 50KB).
+ */
+export async function uploadOrProcessImage(file: File): Promise<string> {
+  // 1. Coba upload langsung ke Supabase Storage via /api/upload
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data?.url) {
+        return data.url;
+      }
+    }
+  } catch {
+    // Lanjutkan ke fallback lokal jika Supabase belum aktif
+  }
+
+  // 2. Fallback kompresi lokal WebP
+  return processImageFile(file, 850, 850, 0.76);
 }
